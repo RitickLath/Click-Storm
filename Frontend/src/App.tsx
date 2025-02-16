@@ -1,5 +1,17 @@
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import Room from "./routes/Room";
+import Home from "./routes/Home";
+
 const App = () => {
-  return <div className="text-3xl">App</div>;
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/:id" element={<Room />} />
+        <Route path="/as" element={<></>} />
+      </Routes>
+    </BrowserRouter>
+  );
 };
 
 export default App;
