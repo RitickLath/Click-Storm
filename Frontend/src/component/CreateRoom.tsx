@@ -9,12 +9,15 @@ const CreateRoom: React.FC<PropType> = ({ changeState, title }) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const tileRef = useRef<HTMLSelectElement | null>(null);
   const timeRef = useRef<HTMLSelectElement | null>(null);
+  const playerRef = useRef<HTMLSelectElement | null>(null);
 
   const handleCreate = () => {
     console.log("Room Name:", inputRef.current?.value || "No Room Name");
     console.log("Tiles:", tileRef.current?.value || "32");
     console.log("Time:", timeRef.current?.value || "30");
+    console.log("Players:", playerRef.current?.value || "2");
   };
+
   const handleJoin = () => {
     console.log("Room Name:", inputRef.current?.value || "No Room Name");
   };
@@ -23,7 +26,7 @@ const CreateRoom: React.FC<PropType> = ({ changeState, title }) => {
     <div className="z-10 absolute inset-0 flex items-center justify-center">
       <div
         className={`relative w-[500px] ${
-          title === "Create Room" ? "h-[400px]" : "h-[300px]"
+          title === "Create Room" ? "h-[500px]" : "h-[300px]"
         } bg-black/40 backdrop-blur-lg border border-gray-700 rounded-xl shadow-lg p-6 flex flex-col items-center justify-center space-y-6`}
       >
         {/* Close Button */}
@@ -64,12 +67,24 @@ const CreateRoom: React.FC<PropType> = ({ changeState, title }) => {
               <option value="45">45 Seconds</option>
               <option value="60">60 Seconds</option>
             </select>
+
+            {/* Select Number of Players */}
+            <select
+              ref={playerRef}
+              className="w-full px-4 py-2 text-lg bg-black/40 text-white border-2 border-gray-500 rounded-md outline-none focus:border-purple-500"
+            >
+              <option className="" value="2">
+                2 Players
+              </option>
+              <option value="3">3 Players</option>
+              <option value="4">4 Players</option>
+            </select>
           </>
         )}
 
         {/* Create/Join Button */}
         <button
-          onClick={title == "Create Room" ? handleCreate : handleJoin}
+          onClick={title === "Create Room" ? handleCreate : handleJoin}
           className="w-full py-3 text-lg font-semibold text-white bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
         >
           {title}
