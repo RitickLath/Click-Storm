@@ -1,4 +1,8 @@
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { io } from "socket.io-client";
+
+const socket = io("http://localhost:3000");
 
 interface PropType {
   changeState: (value: boolean) => void;
@@ -9,17 +13,48 @@ const CreateRoom: React.FC<PropType> = ({ changeState, title }) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const tileRef = useRef<HTMLSelectElement | null>(null);
   const timeRef = useRef<HTMLSelectElement | null>(null);
-  const playerRef = useRef<HTMLSelectElement | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    socket.on("connect", () => {
+      console.log("Connected with ID:", socket.id);
+    });
+
+    return () => {
+      socket.off("connect");
+    };
+  }, []);
 
   const handleCreate = () => {
-    console.log("Room Name:", inputRef.current?.value || "No Room Name");
-    console.log("Tiles:", tileRef.current?.value || "32");
-    console.log("Time:", timeRef.current?.value || "30");
-    console.log("Players:", playerRef.current?.value || "2");
+    if (!inputRef.current?.value) {
+      alert("Please enter a room name.");
+      return;
+    }
+
+    socket.emit("CreateRoom", {
+      roomName: inputRef.current.value,
+      tiles: tileRef.current?.value || 32,
+      admin: socket.id,
+    });
+
+    setTimeout(() => {
+      navigate(`/${socket.id}`);
+    }, 500);
   };
 
   const handleJoin = () => {
-    console.log("Room Name:", inputRef.current?.value || "No Room Name");
+    if (!inputRef.current?.value) {
+      alert("Please enter a room name.");
+      return;
+    }
+
+    socket.emit("JoinRoom", {
+      roomName: inputRef.current.value,
+    });
+
+    setTimeout(() => {
+      navigate(`/${socket.id}`);
+    }, 500);
   };
 
   return (
@@ -45,7 +80,6 @@ const CreateRoom: React.FC<PropType> = ({ changeState, title }) => {
           className="w-full px-4 py-2 text-lg text-white bg-transparent border-2 border-gray-500 rounded-md outline-none focus:border-purple-500 placeholder-gray-400"
         />
 
-        {/* Show Extra Inputs if Creating a Room */}
         {title === "Create Room" && (
           <>
             {/* Select Number of Tiles */}
@@ -66,18 +100,6 @@ const CreateRoom: React.FC<PropType> = ({ changeState, title }) => {
               <option value="30">30 Seconds</option>
               <option value="45">45 Seconds</option>
               <option value="60">60 Seconds</option>
-            </select>
-
-            {/* Select Number of Players */}
-            <select
-              ref={playerRef}
-              className="w-full px-4 py-2 text-lg bg-black/40 text-white border-2 border-gray-500 rounded-md outline-none focus:border-purple-500"
-            >
-              <option className="" value="2">
-                2 Players
-              </option>
-              <option value="3">3 Players</option>
-              <option value="4">4 Players</option>
             </select>
           </>
         )}

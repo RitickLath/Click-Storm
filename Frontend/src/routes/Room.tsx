@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from "react";
+// import { io } from "socket.io-client";
 // import { useParams } from "react-router-dom";
+
+// const socket = io("http://localhost:3000");
 
 const Room = () => {
   //const { RoomId } = useParams();
