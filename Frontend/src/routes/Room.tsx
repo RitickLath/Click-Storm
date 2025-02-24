@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-// import { io } from "socket.io-client";
-// import { useParams } from "react-router-dom";
+import { io } from "socket.io-client";
+import { useParams } from "react-router-dom";
 
-// const socket = io("http://localhost:3000");
+const socket = io("http://localhost:3000");
 
 const Room = () => {
-  //const { RoomId } = useParams();
+  const { socket, roomName } = useParams();
   const [tile] = useState<number>(64);
   const [time, setTime] = useState<number>(30);
   const intervalRef = useRef<number | null>(null);
@@ -20,6 +20,7 @@ const Room = () => {
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+        //socket.emit("end game", { socket: socket.id });
       }
     };
   }, []);

@@ -1,4 +1,9 @@
-import { useRef, useEffect } from "react";
+// user will create a room
+// user will wait till the other player will join the room
+// if other player joins the room backend will send "start game"  message with socket id of both
+// and if we gets the socket id as message from backend we will start the game
+
+import { useRef, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 
@@ -12,18 +17,31 @@ interface PropType {
 const CreateRoom: React.FC<PropType> = ({ changeState, title }) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const tileRef = useRef<HTMLSelectElement | null>(null);
-  const timeRef = useRef<HTMLSelectElement | null>(null);
+  const [admin, setAdmin] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    socket.on("connect", () => {
-      console.log("Connected with ID:", socket.id);
-    });
+    // Handle start game event when received
+    const handleStartGame = (data: {
+      player1: string;
+      player2: string;
+      roomName: string;
+    }) => {
+      // console.log(data.player1);
+      // console.log(socket.id);
+      // console.log(data.player1);
+
+      if (data.player1 == socket.id || data.player2 == socket.id) {
+        navigate(`/${socket.id}/${data.roomName}`);
+      }
+    };
+
+    socket.on("start game", handleStartGame);
 
     return () => {
-      socket.off("connect");
+      socket.off("start game", handleStartGame);
     };
-  }, []);
+  }, [navigate]);
 
   const handleCreate = () => {
     if (!inputRef.current?.value) {
@@ -31,15 +49,11 @@ const CreateRoom: React.FC<PropType> = ({ changeState, title }) => {
       return;
     }
 
-    socket.emit("CreateRoom", {
-      roomName: inputRef.current.value,
-      tiles: tileRef.current?.value || 32,
-      admin: socket.id,
+    const roomName = inputRef.current.value;
+    setAdmin(true);
+    socket.emit("createRoom", {
+      roomName,
     });
-
-    setTimeout(() => {
-      navigate(`/${socket.id}`);
-    }, 500);
   };
 
   const handleJoin = () => {
@@ -48,13 +62,9 @@ const CreateRoom: React.FC<PropType> = ({ changeState, title }) => {
       return;
     }
 
-    socket.emit("JoinRoom", {
-      roomName: inputRef.current.value,
-    });
-
-    setTimeout(() => {
-      navigate(`/${socket.id}`);
-    }, 500);
+    const roomName = inputRef.current.value;
+    setAdmin(false);
+    socket.emit("joinRoom", { roomName });
   };
 
   return (
@@ -90,16 +100,6 @@ const CreateRoom: React.FC<PropType> = ({ changeState, title }) => {
               <option value="32">32 Tiles</option>
               <option value="64">64 Tiles</option>
               <option value="128">128 Tiles</option>
-            </select>
-
-            {/* Select Game Duration */}
-            <select
-              ref={timeRef}
-              className="w-full px-4 py-2 text-lg bg-black/40 text-white border-2 border-gray-500 rounded-md outline-none focus:border-purple-500"
-            >
-              <option value="30">30 Seconds</option>
-              <option value="45">45 Seconds</option>
-              <option value="60">60 Seconds</option>
             </select>
           </>
         )}
