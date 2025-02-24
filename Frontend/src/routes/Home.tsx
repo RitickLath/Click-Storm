@@ -1,15 +1,23 @@
 import { useState } from "react";
 import CreateRoom from "../component/CreateRoom";
 
-const Home = () => {
+const Home = ({ socket }) => {
   const [create, setCreate] = useState<boolean>(false);
   const [join, setJoin] = useState<boolean>(false);
 
   return (
     <div className="pt-12 px-4 sm:px-6 lg:px-12 flex flex-col items-center justify-evenly h-screen text-yellow-400 font-semibold">
       {/* Modal for Create/Join */}
-      {create && <CreateRoom title="Create Room" changeState={setCreate} />}
-      {join && <CreateRoom title="Join Room" changeState={setJoin} />}
+      {create && (
+        <CreateRoom
+          socket={socket}
+          title="Create Room"
+          changeState={setCreate}
+        />
+      )}
+      {join && (
+        <CreateRoom socket={socket} title="Join Room" changeState={setJoin} />
+      )}
 
       <div className="text-center">
         <h1 className="font-start text-3xl sm:text-6xl tracking-widest">

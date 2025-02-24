@@ -5,16 +5,16 @@
 
 import { useRef, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { io } from "socket.io-client";
 
-const socket = io("http://localhost:3000");
+// const socket = io("http://localhost:3000");
 
 interface PropType {
   changeState: (value: boolean) => void;
   title: "Create Room" | "Join Room";
+  socket: any;
 }
 
-const CreateRoom: React.FC<PropType> = ({ changeState, title }) => {
+const CreateRoom: React.FC<PropType> = ({ changeState, title, socket }) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const tileRef = useRef<HTMLSelectElement | null>(null);
   const [admin, setAdmin] = useState(false);
@@ -27,10 +27,6 @@ const CreateRoom: React.FC<PropType> = ({ changeState, title }) => {
       player2: string;
       roomName: string;
     }) => {
-      // console.log(data.player1);
-      // console.log(socket.id);
-      // console.log(data.player1);
-
       if (data.player1 == socket.id || data.player2 == socket.id) {
         navigate(`/${socket.id}/${data.roomName}`);
       }
