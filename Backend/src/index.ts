@@ -4,8 +4,6 @@ import { Server } from "socket.io";
 import cors from "cors";
 import { initializeSocket } from "./sockets";
 
-let rooms: any = [];
-
 const app = express();
 app.use(cors());
 
