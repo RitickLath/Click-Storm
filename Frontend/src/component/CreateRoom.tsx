@@ -1,12 +1,5 @@
-// user will create a room
-// user will wait till the other player will join the room
-// if other player joins the room backend will send "start game"  message with socket id of both
-// and if we gets the socket id as message from backend we will start the game
-
 import { useRef, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-// const socket = io("http://localhost:3000");
 
 interface PropType {
   changeState: (value: boolean) => void;
@@ -18,6 +11,7 @@ const CreateRoom: React.FC<PropType> = ({ changeState, title, socket }) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const tileRef = useRef<HTMLSelectElement | null>(null);
   const [admin, setAdmin] = useState(false);
+  const [waitingForPlayer, setWaitingForPlayer] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,8 +21,7 @@ const CreateRoom: React.FC<PropType> = ({ changeState, title, socket }) => {
       player2: string;
       roomName: string;
     }) => {
-      if (data.player1 == socket.id || data.player2 == socket.id) {
-        // if admin navitation last endpoint have 0
+      if (data.player1 === socket.id || data.player2 === socket.id) {
         navigate(`/${socket.id}/${data.roomName}/${admin ? 0 : 12}`);
       }
     };
@@ -38,7 +31,7 @@ const CreateRoom: React.FC<PropType> = ({ changeState, title, socket }) => {
     return () => {
       socket.off("start game", handleStartGame);
     };
-  }, [navigate]);
+  }, [navigate, socket, admin]);
 
   const handleCreate = () => {
     if (!inputRef.current?.value) {
@@ -48,9 +41,8 @@ const CreateRoom: React.FC<PropType> = ({ changeState, title, socket }) => {
 
     const roomName = inputRef.current.value;
     setAdmin(true);
-    socket.emit("createRoom", {
-      roomName,
-    });
+    setWaitingForPlayer(true); // Set waiting state when room is created
+    socket.emit("createRoom", { roomName });
   };
 
   const handleJoin = () => {
@@ -101,6 +93,13 @@ const CreateRoom: React.FC<PropType> = ({ changeState, title, socket }) => {
           </>
         )}
 
+        {/* Waiting for Player message */}
+        {waitingForPlayer && (
+          <div className="text-white text-xl mt-4">
+            Waiting for the other player to join...
+          </div>
+        )}
+
         {/* Create/Join Button */}
         <button
           onClick={title === "Create Room" ? handleCreate : handleJoin}
@@ -114,3 +113,54 @@ const CreateRoom: React.FC<PropType> = ({ changeState, title, socket }) => {
 };
 
 export default CreateRoom;
+
+/**
+ * CreateRoom Component - This component is responsible for creating or joining a game room.
+ *
+ * Basic Flow:
+ * 1. **Props**:
+ *    - `changeState`: A function passed as a prop to close the modal when the user is done.
+ *    - `title`: A string that determines whether the component is in "Create Room" or "Join Room" mode.
+ *    - `socket`: A socket instance used to communicate with the backend server for room creation and joining.
+ *
+ * 2. **Component Setup**:
+ *    - `useRef` is used to keep references to the room name input field (`inputRef`) and the tile number select dropdown (`tileRef`).
+ *    - `useState` is used to manage component state:
+ *      - `admin`: A boolean state that determines if the current user is the admin (creator) of the room.
+ *      - `waitingForPlayer`: A new state used to display a message when the room is created, and the system is waiting for another player to join.
+ *
+ * 3. **Event Handling**:
+ *    - **Create Room**:
+ *      - The `handleCreate` function is triggered when the user clicks the "Create Room" button.
+ *      - It checks if the room name is provided. If not, an alert is shown.
+ *      - If the room name is valid, it emits a `createRoom` event to the backend with the room name and sets the current user as the admin.
+ *      - The `waitingForPlayer` state is set to `true` to show a waiting message while the room is waiting for the second player to join.
+ *
+ *    - **Join Room**:
+ *      - The `handleJoin` function is triggered when the user clicks the "Join Room" button.
+ *      - It checks if the room name is provided. If not, an alert is shown.
+ *      - If the room name is valid, it emits a `joinRoom` event to the backend to join the room.
+ *      - The `admin` state is set to `false` since the user is joining an existing room.
+ *
+ * 4. **Socket Communication**:
+ *    - The component listens for the `start game` event from the backend using `socket.on("start game")`.
+ *    - When the `start game` event is received, the component checks if the current user is part of the game (either `player1` or `player2`).
+ *    - If the user is part of the game, they are redirected to the room page using `navigate` with their `socket.id`, the `roomName`, and their admin status (either `0` or `12`).
+ *    - The `socket.off("start game")` is used to clean up the event listener when the component is unmounted.
+ *
+ * 5. **UI Rendering**:
+ *    - The component renders a modal with:
+ *      - A room name input field to enter the name of the room.
+ *      - A select dropdown for the number of tiles (only visible when the user is creating a room).
+ *      - A "Waiting for player" message that is displayed when the room is created and waiting for the second player.
+ *      - A button that changes its label to either "Create Room" or "Join Room" depending on the `title` prop.
+ *
+ * 6. **Navigation**:
+ *    - Upon successful room creation or joining, the user is navigated to a new page for the game room using `navigate`.
+ *    - The `navigate` method ensures that the user is redirected to the appropriate room page after the game starts.
+ *
+ * Notes:
+ * - If the user is creating a room, they can select the number of tiles (32, 64, or 128 tiles).
+ * - If the user is joining a room, they simply need to input the room name and join.
+ * - The `waitingForPlayer` state controls whether the component shows the message "Waiting for the other player to join..." or not.
+ */
