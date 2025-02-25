@@ -28,7 +28,8 @@ const CreateRoom: React.FC<PropType> = ({ changeState, title, socket }) => {
       roomName: string;
     }) => {
       if (data.player1 == socket.id || data.player2 == socket.id) {
-        navigate(`/${socket.id}/${data.roomName}`);
+        // if admin navitation last endpoint have 0
+        navigate(`/${socket.id}/${data.roomName}/${admin ? 0 : 12}`);
       }
     };
 

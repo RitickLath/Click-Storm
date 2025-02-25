@@ -9,8 +9,12 @@ const App = () => {
   return (
     <BrowserRouter>
       <Routes>
+        {/* For admin 0 for non admin non-zero */}
         <Route path="/" element={<Home socket={socket} />} />
-        <Route path="/:socketId/:roomName" element={<Room socket={socket} />} />
+        <Route
+          path="/:socketId/:roomName/:admin"
+          element={<Room socket={socket} />}
+        />
       </Routes>
     </BrowserRouter>
   );
