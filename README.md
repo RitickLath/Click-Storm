@@ -5,7 +5,7 @@
 Click Storm is a multiplayer challenge where players must click on tiles as quickly as possible to earn points. The player with the most clicks at the end of a timed round wins the game. This repository consists of a **frontend** and **backend** for the game, allowing users to join or create rooms and compete in real-time.
 
 ## Video
-
+https://github.com/user-attachments/assets/2d4b77d0-2b6f-4c0d-8f9f-0f9bbcc0da12
 
 ## Directory Structure
 
