@@ -15,7 +15,6 @@ let roomsArray: roomArrayType[] = [];
 export const initializeSocket = (io: any) => {
   io.on("connection", (socket: any) => {
     console.log("Connection Established: " + socket.id);
-
     socket.on("createRoom", (data: any) => createRoom(data, socket, io));
     socket.on("joinRoom", (data: any) => joinRoom(data, socket, io));
     socket.on("hit", (data: any) => hit(data, socket, io));
