@@ -19,7 +19,6 @@ export const initializeSocket = (io: any) => {
     socket.on("createRoom", (data: any) => createRoom(data, socket, io));
     socket.on("joinRoom", (data: any) => joinRoom(data, socket, io));
     socket.on("hit", (data: any) => hit(data, socket, io));
-    socket.on("result", (data: any) => result(data, socket, io));
     socket.on("disconnect", (data: any) => disconnect(data));
   });
 };
@@ -75,12 +74,22 @@ export const hit = (data: any, socket: any, io: any) => {
         roomObject.score1 = (roomObject.score1 || 0) + 1;
         // @ts-ignore
         roomObject?.colorArr[index] = roomObject.color1; // Mark the tile as hit by player 1
-        io.to(roomName).emit("color", { color: roomObject.color1, index }); // Emit color to frontend
+        io.to(roomName).emit("color", {
+          color: roomObject.color1,
+          index,
+          player1: roomObject.score1,
+          player2: roomObject.score2,
+        }); // Emit color to frontend
       } else if (roomObject.player2 === socket.id) {
         roomObject.score2 = (roomObject.score2 || 0) + 1;
         // @ts-ignore
         roomObject?.colorArr[index] = roomObject.color2; // Mark the tile as hit by player 2
-        io.to(roomName).emit("color", { color: roomObject.color2, index }); // Emit color to frontend
+        io.to(roomName).emit("color", {
+          color: roomObject.color2,
+          index,
+          player1: roomObject.score1,
+          player2: roomObject.score2,
+        }); // Emit color to frontend
       }
 
       io.to(roomName).emit("updateScores", {
@@ -92,31 +101,6 @@ export const hit = (data: any, socket: any, io: any) => {
     }
   } else {
     console.log("Room Not Found or Game Finished:", roomName);
-  }
-};
-
-export const result = (data: any, socket: any, io: any) => {
-  const { roomName } = data;
-  const roomObject = roomsArray.find((r) => r.roomName === roomName);
-
-  if (roomObject && roomObject.gameStatus === "ongoing") {
-    let winner = "Tie";
-    if ((roomObject.score1 || 0) > (roomObject.score2 || 0)) {
-      winner = "Player-1";
-    } else if ((roomObject.score2 || 0) > (roomObject.score1 || 0)) {
-      winner = "Player-2";
-    }
-
-    io.to(roomName).emit("result", {
-      player1: roomObject.score1,
-      player2: roomObject.score2,
-      winner,
-    });
-
-    roomObject.gameStatus = "finished";
-    console.log("Game finished:", roomName);
-  } else {
-    console.log("Room Not Found or Game Already Finished:", roomName);
   }
 };
 
